@@ -44,7 +44,7 @@ genNative2:
 	
 .PHONY: clean
 clean: clean_tex
-	rm main.pdf
+	rm *.pdf
 	
 .PHONY: clean_tex
 clean_tex:
