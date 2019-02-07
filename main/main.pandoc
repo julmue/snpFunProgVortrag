@@ -1,0 +1,629 @@
+---
+header-includes:
+  - \hypersetup{colorlinks=true,
+            allbordercolors={0 0 0},
+            pdfborderstyle={/S/U/W 1},
+            urlcolor=[rgb]{0,0.4,0.5},
+            linkcolor=[rgb]{0.5,0,0}
+            }
+---
+
+---
+title: Funktionale Programmierung
+subtitle: Grundlagen
+author: Julian Müller
+---
+
+<!-- --------------------------------------------------------------- -->
+# Warum funktionale Programmierung?
+
+## Funktionaler "Hype" 
+
+* C++: Templates, Template Metaprogramming, Lambdas
+* Java: Generics, Lambdas, Streams, MapReduce
+* C Sharp: Generics, Lambdas, LINQ
+* Scala: Funktionale Programmiersprache auf der JVM (Apache Spark, ...)
+* JavaScript: "Web-Assembler", Scheme in Java's clothing
+* R: Data Science und Machine Learning
+* Abap: ... Abap?
+
+## Ernsthaft Abap?
+
+* Type-Inference (#)
+* Konstruktorausdrücke
+* Streaming
+
+## Abap Konstruktorasudrücke
+
+~~~{ .haskell }
+... REDUCE type( 
+      [let_exp] 
+      INIT {x1 = rhs1}|{<x1> = wrexpr1}
+					  |{x1|<x1> TYPE dtype1} 
+           {x2 = rhs2}|{<x2> = wrexpr2}
+					  |{x2|<x2> TYPE dtype2} 
+           ... 
+      FOR for_exp1 
+      FOR for_exp2 
+      ... 
+      NEXT ... 
+           {x1 = rhs1}|{<x1> = wrexpr1} 
+           {x2 = rhs2}|{<x2> = wrexpr2} 
+           ... ) ... 
+~~~
+
+## Abap Konstruktorausdrücke
+
+~~~{ .haskell }
+cl_demo_output=>display( 
+  REDUCE i( INIT s = 0 
+            FOR  i = 1 UNTIL i > 10 
+            NEXT s = s + i ) ). 
+~~~
+
+## Funktionaler "Hype": Buzzwords
+
+* [Lambdas (anonymous functions)](https://en.wikipedia.org/wiki/Anonymous_function)
+* [Closures](https://en.wikipedia.org/wiki/Closure_(computer_programming))
+* [Currying / Higher Order Functions](https://en.wikipedia.org/wiki/Currying)
+* [Immutability](https://en.wikipedia.org/wiki/Immutable_object)
+* [Streaming](https://en.wikipedia.org/wiki/Stream_(computing))
+* [Map-Reduce](https://en.wikipedia.org/wiki/MapReduce)
+* [Monaden](https://en.wikipedia.org/wiki/Monad_(functional_programming)) 
+* ...
+
+<!-- --------------------------------------------------------------- -->
+# Anwendungen funktionaler Programmierung
+
+## Massiv parallelisierte Anwendungen
+
+* Backend Services: [Sigma (facebook Spamfilter)](https://code.fb.com/security/fighting-spam-with-haskell/)
+* Cluster Computing: [Apache Spark](https://spark.apache.org/)
+* High Frequency Trading: [Jane Street, Allston Trading](https://blog.janestreet.com/why-ocaml/)
+* Telekommunikation / Switches (hier isb. [Erlang](https://de.wikipedia.org/wiki/Erlang_(Programmiersprache)))
+* ...
+
+## Language and DSL Design (I)
+
+* [Purescript](http://www.purescript.org/): Functional Web Programming
+* [Idris](https://www.idris-lang.org/): Funktionale Sprache mit Dependent Types
+* [Crush](http://google.com): Untypisiertes Lambdakalkül
+* [Pandoc](https://pandoc.org/): Markup Converter (diese Präsentation)
+* ...
+
+## Tests und Beweis von Programmeigenschaften
+
+* [Coq](https://de.wikipedia.org/wiki/Coq_(Software)): Beweisassistent mit Programmsynthese
+* [Idris](https://www.idris-lang.org/): Funktionale Sprache mit Dependent Types
+* [Haskell](https://www.haskell.org/): Beweis via SMT (Liquid Haskell), Property-Based-Testing
+* ...
+
+<!-- --------------------------------------------------------------- -->
+# Livedemo: DSL der Arithmetik
+
+## Livedemo
+
+Sprache der Arithmetik
+
+* 100 Zeilen Code
+* Sprachdefinition: Variablen, Addition, Multiplikation
+* Parser
+* Fold (-> Constructor Expression)
+* Pretty Printer
+* Evaluator
+* Term Rewriting / Simplification: Distributivität
+* Property-Based-Testing
+
+## Livedemo
+
+Kleiner Cheat
+
+* Bibliothek für den Parser (Parsec)
+* Bibliothek für das Property-Based-Testing (QuickCheck)
+
+Ohne jede Bibliothek wären es 200 Zeilen ...
+
+## Livedemo
+
+Was kann man mit so einer DSL machen?
+
+* Verwendung in Businessrules, Auswertung zur Compilezeit
+* Symbolische Algebra
+	* Automatische Differenziation
+	* Automatische Integration (Risch-Algorithmus)
+* Verwendung in Beweissystemen (Presburgerarithmetik)
+* ...
+
+<!-- --------------------------------------------------------------- -->
+\newpage
+# Was ist funktionale Programmierung?
+
+## Funktionale Programmierung im engeren Sinn
+
+Funktionale Programmierung im engeren Sinn:
+
+> Alle Programmiermodelle denen das Lambdakalkül zugrunde liegt
+
+## Funktionale Programmierung im weiteren Sinn
+
+Funktionale Programmierung im weiteren Sinn:
+
+> Alle Programmiermodelle die an das Lambdakalkül angelehnt sind
+
+
+<!-- --------------------------------------------------------------- -->
+\newpage
+# Das untypisiert / pure Lambdakalkül
+
+## Komponenten des Lambdakalküls
+
+Jede Programmiersprache besteht aus zwei Komponenten:
+
+1. Syntax zur Konstruktion von Programmen
+2. Semantik zur Auswertung der Programme
+
+Das gilt auch für das Lambdakalkül
+
+## Definition Lambdakalkül - Generative Grammatik
+
+Die Menge aller Lambdaterme $Term$ wird durch die folgende generative Grammatik definiert: 
+
+$$Term~=~Var~|~(Term~Term)~|~(\lambda Var.Term)$$
+
+wobei die folgenden Symbole verwendet werden:
+\begin{enumerate}
+\item (Variablen) $Var = v_0, v_1, \dots$
+\item (Abstraktor) $\lambda$
+\item (Klammern) $($,$)$
+\end{enumerate}
+
+## Hintergrund
+
+> Das ist die gesamte Syntax der Programmiersprache *Lambdakalkül*.
+
+Wie kommt man darauf so etwas zu entwickeln?
+
+
+<!-- --------------------------------------------------------------- -->
+\newpage
+# Geschichte des Lambdakalküls
+
+## Geschichte: Geschichte der Mathematik
+
+Die Geschichte der Mathematik ist eine Geschichte grandiosen Scheiterns
+
+* Cantor: ["naive" Mengenlehre](https://en.wikipedia.org/wiki/Naive_set_theory) [(Russellsche Antinomie)](https://en.wikipedia.org/wiki/Russell%27s_paradox)
+* Frege: Prädikatenlogik zweiter Stufe [(Russellsche Antinomie)](https://en.wikipedia.org/wiki/Russell%27s_paradox)
+* Hilbert: Widerspruchsfreiheit der Arithmetik [(Gödels Unvollständigkeitssatz)](https://de.wikipedia.org/wiki/G%C3%B6delscher_Unvollst%C3%A4ndigkeitssatz)
+* Hilbert: Entscheidungsproblem (?)
+
+## Geschichte: Entscheidungsproblem
+
+Kernfrage der Logiker und Mathematiker - [Entscheidungsproblem (Hilbert 1928)](https://de.wikipedia.org/wiki/Entscheidbar)
+
+> Gibt es einen Algorithmus […], 
+> der von einer beliebigen Formel eines logischen Kalküls feststellt, 
+> ob sie aus gewissen vorgegebenen Axiomen folgt oder nicht?
+
+Der Algorithmus muss also effektiv berechenbar sein
+
+## Geschichte: Entscheidungsproblem
+
+![Entscheidungsproblem](./img/Entscheidungsproblem_small.png)
+
+
+## Geschichte: Entscheidungsproblem
+
+![David Hilbert](./img/Hilbert_small.jpg)
+
+## Geschichte: Algorithmen
+
+Aber was ist ein Alogrithmus? Und was bedeutet Berechenbarkeit?
+
+> Intuitiv: Algorithmen sind berechenbare Funktionen
+
+Drei Formalisierungen berechenbarer Funktionen:
+
+1. Rekursive Funktionen (Kurt Gödel)
+2. Turingmaschinen (Alan Turing)
+3. Lambdakalkül (Alonzo Church)
+
+## Geschichte 3: Church-Turing-These
+
+[Church-Turing-These](https://de.wikipedia.org/wiki/Church-Turing-These)
+
+> Die Klasse der Turing-berechenbaren Funktionen stimmt mit der Klasse der intuitiv berechenbaren Funktionen überein
+
+Weiter gilt im Bezug auf die Klasse der formalisierbaren Funktionen:
+
+Turing-Maschinen = Lambda-Kalkül = Rekursive Funktionen
+
+Ein und derselbe Gegenstand (Definition der berechenbaren Funktion) aus drei verschiedenen Perspektiven.
+
+## Geschichte: Abstraktion / Essenz
+![Abstraktion](./img/Abstraktion.jpg "Abstraktion")
+
+## Geschichte: Die Essenz berechenbarer Funktionen
+
+Syntax des Lambdakalküls
+
+\begin{minipage}{\textwidth}
+\begin{center}
+\begin{minipage}{0.5\textwidth}
+\raggedright
+\begin{flalign}
+Term~&=~Var~\\
+	 &~|~(Term~Term)~\\
+	 &~|~(\lambda Var.Term)&&
+\end{flalign}
+\end{minipage}
+\end{center}
+\end{minipage}
+wobei
+\begin{enumerate}
+\item Variablen
+\item Funktionen anwenden (lies: $(Fun~Arg)$)
+\item Funktionen definieren
+\end{enumerate}
+
+## Geschichte: Entscheidungsproblem
+
+Das grandiose Scheitern setzt sich fort ...
+
+* 1930: Hilbert glaubt nicht an die Existenz unlösbarer Probleme
+* 1936: Alonzo Church beweist, dass die semantische Äquivalenz zweier Lambdaterme 
+	    (= Programme) im Allgemeinen nicht beweisbar ist
+* 1936: Alan Turing beweist, dass das Halteproblem formuliert mit Turingmaschinen
+		nicht lösbar ist
+
+
+# Syntax des Lambdakalküls
+
+Zurück zur Syntax des Kalküls ...
+
+Was fällt auf?
+
+* Im puren Lambdakalkül gibt es nur einen Typ: Funktionen
+* Alle Funktionen sind einstellig (unäre Funktionen) 
+* Es gibt keine interpretierten Konstanten (+, /, concat, ...)
+* Es gibt keinen Zuweisungsoperator (Destructive Assignment)
+
+## Syntax des Kalküls: Interpretierte Konstanten
+
+Out-of-the-Box gibt es keine weiteren Datentypen wie `String`, `Bool` oder `Int`
+
+* Diese lassen sich im Lambdakalkül kodieren (vgl. Church-Encoding) 
+* Für die bessere Verständlichkeit nehmen wir ab hier an einige dieser
+  Konstanten bereits definiert zu haben (+, 1, 2, 3, ...)
+
+## Syntax des Kalküls: Abstraktion
+
+Funktionen werden durch den Abstraktionsoperator $\lambda$ gebildet.
+Die Anatomie einer Funktion ist dabei wie folgt:
+
+$$\lambda input. body$$
+
+Beispiel
+$$(\lambda x.x^2 + x + 1)$$
+
+wobei
+
+* Input (Signatur) der Funktion: $x$
+* Funktionskörper: $x^2 + x + 1$
+
+## Syntax des Kalküls: Abstraktion
+
+$$f(x) = x^2 + x + 1$$ 
+
+wird wie folgt als Lambdaterm dargestellt: 
+	
+$$\lambda x.x^2 + x + 1$$
+	
+* Die frei im Term $T(x) = x^2 + x + 1$ vorkommende Variable $x$
+  wird durch die Abstraktion $\lambda x.T(x)$ gebunden
+
+* Die Variable $x$ in $T$ ist jetzt im Skopus der Abstraktion $\lambda x$
+
+* Ein Lambdaterm ohne freie Variablen wird *Kombinator* genannt
+
+## Syntax des Kalküls: Applikation
+Die Anwendungen der Funktion wird durch die \emph{Applikation} formalisiert:
+
+\begin{displaymath}
+(\lambda x.x^2 + x + 1) ~ 3
+\end{displaymath}
+
+Durch Applikation wird nur ein neuer Term gebildet -- die Berechnung findet noch nicht statt
+
+<!-- --------------------------------------------------------------- -->
+\newpage
+## Einige Lambdaterme im puren Lambdakalkül
+
+\begin{minipage}{\textwidth}
+\vspace{-4mm}
+\begin{flalign*}
+&x \\
+&x (\lambda x.\lambda y.z) h\\
+&\lambda z.(\lambda x.y (\lambda x.z)) (\lambda y.y)& % last & left aligns 
+\end{flalign*}
+\end{minipage}
+
+\begin{minipage}{\textwidth}
+\begin{flalign*}
+S &= \lambda x.\lambda y.\lambda y.x~z~(y~z)			\\
+K &= \lambda x.\lambda y.x					\\
+I &= \lambda x.x						\\
+\omega &= \lambda x.x~x						\\
+\Omega &= \omega~\omega = (\lambda x.x~x)(\lambda x.x~x)		\\
+Y &= \lambda f.(\lambda x.f(x~x))(\lambda x.f(x~x))&
+\end{flalign*}
+\end{minipage}
+
+<!-- --------------------------------------------------------------- -->
+\newpage
+# Semantik des Lambdakalküls
+
+## Semantik des Kalküls: Auswertung / Reduktion
+
+* Lambda-Terme werden durch *Substitution* ausgewertet
+* Variablen im Skopus einer Abstraktionen bezeichnen die Stellen,
+	an denen bei der Substitution die Funktionsargumente eingesetzt werden:
+
+\begin{displaymath}
+	{\prftree[r] {(Arithmetik)} 
+		{\prftree[r] {(Arithmetik)}
+			{\prftree[r] {(Arithmetik)}
+				{\prftree[r] {(Substitution)}
+				{(\lambda x.x^2 + x + 1) ~ 3}
+				{3^2 + 3 + 1}
+				}
+				{9 + 3 + 1}
+			}
+			{12 + 1}
+		} 
+		{13}
+	}
+\end{displaymath}
+
+<!-- --------------------------------------------------------------- -->
+\newpage
+
+## Curch Encoding: Booleans
+
+~~~{ .haskell }
+let tru = \p.\q. p in
+let fls = \p.\q. q in
+let ite = \p.\x.\y. p x y in
+let neg = \p. ite p fls tru in
+neg tru
+~~~
+
+Ausführen:
+    
+    cat .\examples\lambda\church.lambda | crush
+
+## Auswertung von Lambdatermen: Omega
+
+Das Lambdakalkül ist Turingvollständig - nicht jede Auswertung eines 
+Terms terminiert.
+
+~~~{ .haskell }
+let omega = \x. x x in
+let Omega = omega omega in
+Omega
+~~~
+
+Ausführen: 
+
+    cat .\examples\lambda\omega.lambda | crush --limit 5
+
+<!-- --------------------------------------------------------------- -->
+\newpage
+# Currying und Higher-Order-Functions
+
+## Beispiel Addition
+
+Mehrstellige Funktionen können durch einstellige Funktionen dargestellt werden:
+
+Die Additionsfunktion
+
+$$f(x, y) = x + y$$
+
+dargestellt im Lambda-Kalkül:
+
+$$\lambda x.\lambda y. x + y$$
+
+## Partielle Applikation der Addition I
+
+Die "zweistellige" Funktion $\lambda x.\lambda y. x + y$ wird durch 
+Applikation auf die Zahl 1 zur "einstelligen" Funktion $\lambda y. 1 + y$:
+
+\begin{displaymath}
+\prftree[r] {(Substitution)}
+	{(\lambda x.\lambda y. x + y) ~ 1}
+	{(\lambda y. 1 + y)}
+\end{displaymath}
+
+## Partielle Applikation der Addition I
+
+Die Funktion $\lambda y. 1 + y$ kann dann auf ein weiteres Argument 
+angewendet werden um einen Wert zu errechnen:
+
+\begin{displaymath}
+\prftree[r] {(Arithmetik)}
+	{\prftree[r] {(Substitution)}
+		{(\lambda y. 1 + y) ~ 4}
+		{1 + 4}
+	}
+	{5}
+\end{displaymath}
+
+## Partielle Applikation der Addition I(als Graph)
+
+![Addition](./img/addition.png)
+
+## Partielle Applikation der Addition II(als Graph)
+
+![Addition](./img/addition_curried.png)
+
+## Currying und Factories
+
+Die Funktion $\lambda x.\lambda y. x + y$ kann auch als kleine Factory
+für Inkrementfunktionen betrachtet werden. 
+
+Definition
+
+~~~{ .haskell }
+-- this is the function definition in haskell
+incrementorFactory = \x ->\y -> x + y
+
+addOne = incrementFactory 1
+addTwo = incrementFactory 2
+addThree = incrementFactory 3
+~~~
+
+und Auswertung:
+
+~~~{ .haskell }
+addTow 7
+>> 9
+~~~
+
+## Haskell Syntax
+
+Anmerkung: Das erste Mal Haskell! In Haskell wird
+ 
+* `\` statt $\lambda$ und 
+* der Pfeil `->` statt $.$ 
+
+für die Abstraktion verwendet
+
+
+## First Class Functions
+
+Funktionen sind "First-Class-Citizens" in funktionalen Programmiersprachen.
+Sie können an Funktionen übergeben werden oder von Funktionen zurückgegeben werden,
+in Datenstrukturen gespeichert und On-The-Fly generiert werden.
+Es handelt sich ja nur um Lambdaterme ...
+
+* Funktion = Lambdaterm
+* Funktionales Programm = Lambdaterm
+* Ausführung eines Funktionalen Programms: Evaluation durch Substitution
+
+<!-- ---------------------------------------------------------------
+\newpage
+# Interlude: Sinn und Bedeutung
+
+# Motivation Typensysteme: Vermeidung undefinierter Programmzustände (Run-Time)
+
+Operatorenüberladung INT und CHAR und "Addition" -> Einstellige Verknüpfung 
+
+Tracing Addition(+) Char
+
+Vermeidung solcher Kategorienfehler zur Laufzeit möglich?
+
+-->
+
+# Motivation Typensystem
+
+## 
+
+Das pure Lambdakalkül kennt keine Typen; 
+es wird daher auch untypisiertes Lambdakalkül genannt.
+
+Das hier ist problemlos möglich:
+
+~~~{ .haskell }
+addInt = (\x. \y. x +_int y) 
+
+program = addInt True "hello world"
+~~~
+## Was passiert?
+
+Die Eingabewerte sind nicht in der Definitionsmenge der Funktion enthalten
+(es sind ja keine Ganzzahlen).
+
+Es kommt zu einem Laufzeitfehler bzw. Stuck-Terms
+
+~~~{ .haskell }
+True +_int "hello world"
+~~~
+
+oder noch schlimmer: Das Programm läuft weiter und behandelt den Input
+wie Zahlen (soweit es geht)
+
+
+## Das (einfach) typisierte Lambdakalkül
+
+Die Spezifikation der Funktion wird durch Typen ausgedrückt
+
+~~~{ .haskell }
+addInt = (\x:Int.\y:Int. x+y): Int -> Int -> Int
+~~~
+
+wobei `Value : Type` die Typisierungsrelation darstellt. 
+
+## Funtkionen und Typen in Haskell
+
+Funktionsdefinition in Haskell
+
+~~~{ .haskell }
+addInt :: Int -> Int -> Int
+addInt x y = x + y
+~~~
+
+## Funtkionen und Typen in Haskell
+
+Anwendung
+
+~~~{ .haskell }
+addInt True "Hello"
+~~~
+
+Fehler zur Compilezeit:
+
+~~~{ .haskell }
+<interactive>:3:8: error:
+    * Couldn't match expected type 
+		`Int' with actual type `Bool'
+    * In the first argument of `addInt', 
+		namely `True'
+      In the expression: addInt True "Hello"
+      In an equation for `it': 
+		it = addInt True "Hello"
+~~~
+
+# Ende des ersten Teils
+
+## Ausblick
+
+* Typen: Summentypen, Produkttypen
+* Parametrischer Polymorphismus (Generics)
+* Ad-Hoc Polymorphimus (Overloading)
+* Curry-Howard-Isomorphism
+
+## Links
+
+* [Haskell](https://www.haskell.org/)
+* [Stack (Haskell Build Tool)](https://docs.haskellstack.org/en/stable/README/)
+* [Learn Yourself a Haskell for Great Good!](http://learnyouahaskell.com/chapters)
+* [Real World Haskell](http://book.realworldhaskell.org/)
+* [State of the Haskell ecosystem](https://github.com/Gabriel439/post-rfc/blob/master/sotu.md)
+* [What I Wish I knew when learning Haskell](http://dev.stephendiehl.com/hask/)
+* [Haskell Reddit](https://www.reddit.com/r/haskell/)
+
+## Install Crush
+
+Zum installieren von `Crush`
+
+* github: https://github.com/julmue/crush (hier auch README)
+* `git clone https://github.com/julmue/crush`
+* Öffne Powershell / Git Bash im Verzeichnis
+* `stack install`
+* [evtl. Installationsverzeichnis der Pfadvariable hinzufügen](https://docs.haskellstack.org/en/v1.0.2/faq/#stack-setup-on-a-windows-system-only-tells-me-to-add-certain-paths-to-the-path-variable-instead-of-doing-it)
+* Beispiel: cat ./examples/cooked.lam | crush
+
+
+
+
+

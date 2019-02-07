@@ -1,0 +1,4 @@
+let omega = \x. x x in
+let Omega = omega omega in
+Omega
+

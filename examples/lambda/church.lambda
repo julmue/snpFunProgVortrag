@@ -1,0 +1,7 @@
+-- Church Encoding Booleans
+
+let tru = \p.\q. p in
+let fls = \p.\q. q in
+let ite = \p.\x.\y. p x y in
+let neg = \p. ite p fls tru in
+neg tru
